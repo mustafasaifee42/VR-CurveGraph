@@ -21,6 +21,9 @@ class Graph extends Component {
    constructor(props){
       super(props)
       this.state = {
+          width: (this.props.width == null ? 10 : this.props.width),
+          height: (this.props.height == null ? 10 : this.props.height),
+          depth: (this.props.depth == null ? 10 : this.props.depth),
           xDomain: (this.props.xDomain == null ? [0,10] : this.props.xDomain),
           zDomain: (this.props.zDomain == null ? [0,10] : this.props.zDomain),
           xSteps: (this.props.xSteps == null ? 1000 : this.props.xSteps),
@@ -73,6 +76,15 @@ class Graph extends Component {
     let colorValue = d3.scaleLinear()
       .domain([d3.min(dataCoordinate, (d) =>  d[12]), d3.max(dataCoordinate, (d) =>  d[12])])
       .range(this.state.colorScaleValue);
+    let xScale = d3.scaleLinear()
+      .domain(this.state.xDomain)
+      .range([0,this.state.width]);
+    let zScale = d3.scaleLinear()
+      .domain(this.state.zDomain)
+      .range([0,this.state.depth]);
+    let yScale = d3.scaleLinear()
+      .domain([d3.min(dataSphere, (d) =>  d[1]),d3.max(dataSphere, (d) =>  d[1])])
+      .range([0,this.state.height]);
 
 
     let xTick = [], yTick = [], zTick = [],n = 5;
@@ -92,7 +104,7 @@ class Graph extends Component {
         .append("a-entity")
         .attr('class','xTick')
         .attr("line", (d,i) => {
-          return `start: ${d}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1]}; end: ${d}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1] + 0.25}; color: #000; opacity: 1`
+          return `start: ${xScale(d)}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1])}; end: ${xScale(d)}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1]) + 0.25}; color: #000; opacity: 1`
         });
     d3.selectAll('a-scene')
 	      .selectAll('a-entity.xTickText')
@@ -102,7 +114,7 @@ class Graph extends Component {
         .attr('class','xTickText')
         .attr("text", d => `value: ${d.toFixed(2)}; anchor: left; width: 5; color: black`)
         .attr("material",'color:#000')
-        .attr("position", d => `${d}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1] + 0.3}`)
+        .attr("position", d => `${xScale(d)}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1]) + 0.3}`)
     d3.selectAll('a-scene')
 	      .selectAll('a-entity.yTick')
         .data(yTick)
@@ -110,7 +122,7 @@ class Graph extends Component {
         .append("a-entity")
         .attr('class','yTick')
         .attr("line", (d,i) => {
-          return `start: ${this.state.xDomain[0]}, ${d}, ${this.state.zDomain[1]}; end: ${this.state.xDomain[0]}, ${d}, ${this.state.zDomain[1] + 0.25}; color: #000; opacity: 1`
+          return `start: ${xScale(this.state.xDomain[0])}, ${yScale(d)}, ${zScale(this.state.zDomain[1])}; end: ${xScale(this.state.xDomain[0])}, ${yScale(d)}, ${zScale(this.state.zDomain[1]) + 0.25}; color: #000; opacity: 1`
         })
     d3.selectAll('a-scene')
 	      .selectAll('a-entity.yTickText')
@@ -120,7 +132,7 @@ class Graph extends Component {
         .attr('class','yTickText')
         .attr("text", d => `value: ${d.toFixed(2)}; anchor: left; width: 5; color: black`)
         .attr("material",'color:#000')
-        .attr("position", d => `${this.state.xDomain[0]}, ${d + 0.15}, ${this.state.zDomain[1] + 0.6}`)
+        .attr("position", d => `${xScale(this.state.xDomain[0])}, ${yScale(d) + 0.15}, ${zScale(this.state.zDomain[1]) + 0.6}`)
         .attr('rotation','0 90 0')
     d3.selectAll('a-scene')
 	      .selectAll('a-entity.zTick')
@@ -129,7 +141,7 @@ class Graph extends Component {
         .append("a-entity")
         .attr('class','zTick')
         .attr("line", (d,i) => {
-          return `start: ${this.state.xDomain[1]}, ${d3.min(dataSphere, (d) =>  d[1])}, ${d}; end: ${this.state.xDomain[1] + 0.25}, ${d3.min(dataSphere, (d) =>  d[1])}, ${d}; color: #000; opacity: 1`
+          return `start: ${xScale(this.state.xDomain[1])}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(d)}; end: ${xScale(this.state.xDomain[1]) + 0.25}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(d)}; color: #000; opacity: 1`
         })
     d3.selectAll('a-scene')
 	      .selectAll('a-entity.zTickText')
@@ -139,7 +151,7 @@ class Graph extends Component {
         .attr('class','zTickText')
         .attr("text", d => `value: ${d.toFixed(2)}; anchor: left; width: 5; color: black`)
         .attr("material",'color:#000')
-        .attr("position", d => `${this.state.xDomain[1] + 0.1}, ${d3.min(dataSphere, (d) =>  d[1])}, ${d - 0.2}`)
+        .attr("position", d => `${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(d) - 0.2}`)
     
     
     //Drawing Axes Box
@@ -148,39 +160,39 @@ class Graph extends Component {
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[0]}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[0]}; end: ${this.state.xDomain[0]}, ${d3.max(dataSphere, (d) =>  d[1]) + 0.1}, ${this.state.zDomain[0]}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[0])}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[0])}; end: ${xScale(this.state.xDomain[0])}, ${yScale(d3.max(dataSphere, (d) =>  d[1])) + 0.1}, ${zScale(this.state.zDomain[0])}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[0]}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[0]}; end: ${this.state.xDomain[1] + 0.1}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[0]}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[0])}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[0])}; end: ${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[0])}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[0]}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[0]}; end: ${this.state.xDomain[0]}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1] + 0.1}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[0])}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[0])}; end: ${xScale(this.state.xDomain[0])}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1]) + 0.1}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[1] + 0.1}, ${d3.max(dataSphere, (d) =>  d[1]) + 0.1}, ${this.state.zDomain[0]}; end: ${this.state.xDomain[0]}, ${d3.max(dataSphere, (d) =>  d[1]) + 0.1}, ${this.state.zDomain[0]}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.max(dataSphere, (d) =>  d[1])) + 0.1}, ${zScale(this.state.zDomain[0])}; end: ${xScale(this.state.xDomain[0])}, ${yScale(d3.max(dataSphere, (d) =>  d[1])) + 0.1}, ${zScale(this.state.zDomain[0])}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[1] + 0.1}, ${d3.max(dataSphere, (d) =>  d[1]) + 0.1}, ${this.state.zDomain[0]}; end: ${this.state.xDomain[1] + 0.1}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[0]}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.max(dataSphere, (d) =>  d[1])) + 0.1}, ${zScale(this.state.zDomain[0])}; end: ${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[0])}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[0]}, ${d3.max(dataSphere, (d) =>  d[1]) + 0.1}, ${this.state.zDomain[1] + 0.1}; end: ${this.state.xDomain[0]}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1] + 0.1}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[0])}, ${yScale(d3.max(dataSphere, (d) =>  d[1])) + 0.1}, ${zScale(this.state.zDomain[1]) + 0.1}; end: ${xScale(this.state.xDomain[0])}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1]) + 0.1}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[0]}, ${d3.max(dataSphere, (d) =>  d[1]) + 0.1}, ${this.state.zDomain[1] + 0.1}; end: ${this.state.xDomain[0]}, ${d3.max(dataSphere, (d) =>  d[1]) + 0.1}, ${this.state.zDomain[0]}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[0])}, ${yScale(d3.max(dataSphere, (d) =>  d[1])) + 0.1}, ${zScale(this.state.zDomain[1]) + 0.1}; end: ${xScale(this.state.xDomain[0])}, ${yScale(d3.max(dataSphere, (d) =>  d[1])) + 0.1}, ${zScale(this.state.zDomain[0])}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[0]}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1] + 0.1}; end: ${this.state.xDomain[1] + 0.1}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1] + 0.1}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[0])}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1]) + 0.1}; end: ${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1]) + 0.1}; color: #000`)
     d3.selectAll('a-scene')
             .append("a-entity")
             .attr('class','links')
-            .attr("line", `start: ${this.state.xDomain[1] + 0.1}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[0]}; end: ${this.state.xDomain[1] + 0.1}, ${d3.min(dataSphere, (d) =>  d[1])}, ${this.state.zDomain[1] + 0.1}; color: #000`)
+            .attr("line", `start: ${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[0])}; end: ${xScale(this.state.xDomain[1]) + 0.1}, ${yScale(d3.min(dataSphere, (d) =>  d[1]))}, ${zScale(this.state.zDomain[1]) + 0.1}; color: #000`)
 
     
     d3.selectAll('a-scene')
@@ -189,7 +201,7 @@ class Graph extends Component {
         .enter()
         .append("a-entity")
         .attr('class','faceset')
-        .attr('faceset', d => `vertices: ${d[0]} ${d[1]} ${d[2]}, ${d[3]} ${d[4]} ${d[5]}, ${d[6]} ${d[7]} ${d[8]}, ${d[9]} ${d[10]} ${d[11]}`)
+        .attr('faceset', d => `vertices: ${xScale(d[0])} ${yScale(d[1])} ${zScale(d[2])}, ${xScale(d[3])} ${yScale(d[4])} ${zScale(d[5])}, ${xScale(d[6])} ${yScale(d[7])} ${zScale(d[8])}, ${xScale(d[9])} ${yScale(d[10])} ${zScale(d[11])}`)
         .attr('material', d => {
           if(!this.state.colorScale)
             return `color: ${this.state.color}; side: double; opacity: ${this.state.opacity}`

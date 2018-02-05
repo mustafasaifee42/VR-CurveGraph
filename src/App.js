@@ -12,6 +12,9 @@ import data from './data.json';
 class App extends Component {
   render() {
         return <Graph 
+          width = {10}
+          height = {10}
+          depth = {10}
           xDomain = {[0,2*Math.PI]}
           zDomain = {[0,2*Math.PI]}
           xSteps = {50}
